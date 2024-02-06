@@ -57,10 +57,11 @@ wss.on('connection', (socket) => {
     switch(playerMessage.type) {
       case 'connection':
         console.log(`A new player has joined: ${playerMessage.message}`);
+        if (sockets[opponentId].readyState === WebSocket.OPEN)
         break;
       case 'move':
         console.log(playerMessage);
-        if (sockets[playerMessage.opponentId].readyState === WebSocket.OPEN) sockets[playerMessage.opponentId].send(JSON.stringify(playerMessage));
+        if (sockets[opponentId].readyState === WebSocket.OPEN) sockets[opponentId].send(JSON.stringify(playerMessage));
         break;
       default:
         console.log(`We received this message: ${message}`);
