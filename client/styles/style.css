@@ -1,0 +1,51 @@
+:root{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: black;
+}
+h1 {
+  text-align: center ;
+  color: white;
+}
+table {
+  border-spacing: 0px;
+}
+.col {
+  background-color: blue;
+}
+.col:hover {
+  cursor: pointer;
+}
+.empty-col {
+  background-color: black;
+}
+.empty-col:hover {
+  cursor: pointer;
+}
+.chip {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: darkblue;
+  margin: 0.5em;
+}
+.blank-chip {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: black;
+  margin: 0.5em;
+}
+#waiting-for-players{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 50px;
+  font-size: 24px;
+  text-align: center;
+  background-color: white;
+  color: black;
+
+}
