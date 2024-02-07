@@ -66,12 +66,16 @@ function checkRows(row, column, playerNumber) {
   console.log('CHECKING ROWS');
   let piecesInARow = 1;
   let i = column + 1;
+  // Check Right
+  console.log('CHECK RIGHT');
   while (i<gameInformation.numberColumns && grid[row][i] === playerNumber) {
     piecesInARow++;
     i++;
     if (piecesInARow === 4) return true;
   }
   i = column - 1;
+  // Check Left
+  console.log('CHECK LEFT');
   while(i>=0 && grid[row][i] === playerNumber) {
     piecesInARow++;
     i--;
@@ -98,6 +102,7 @@ function checkDiagonals(row, column, playerNumber) {
   // Check right down
   let i = row + 1;
   let j = column + 1;
+  console.log('CHECKING RIGHT DOWN');
   while(i < gameInformation.numberRows && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
     i++;
     j++;
@@ -107,25 +112,29 @@ function checkDiagonals(row, column, playerNumber) {
   // Check left up
   i = row - 1;
   j = column - 1;
-  while(i < gameInformation.numberRows && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
+  console.log('CHECKING LEFT UP');
+  while(i >= 0 && j >= 0 && grid[i][j] === playerNumber) {
     i--;
     j--;
     piecesInARow++;
     if (piecesInARow === 4) return true;
   }
   piecesInARow = 1;
-  //C Check left down
+  // Check left down
   i = row + 1;
   j = column - 1;
-  while(i < gameInformation.numberRows && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
+  console.log('CHECKING LEFT DOWN');
+  while(i < gameInformation.numberRows && j >= 0 && grid[i][j] === playerNumber) {
     i++;
     j--;
     piecesInARow++;
     if (piecesInARow === 4) return true;
   }
+  // Check right up
+  console.log('CHECKING RIGHT UP');
   i = row - 1;
   j = column + 1;
-  while(i < gameInformation.numberRows && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
+  while(i >= 0 && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
     i--;
     j++;
     piecesInARow++;
@@ -147,9 +156,10 @@ function checkWinCondition(row, column) {
 function updateGameState(row, column, componentId) {
   const cellId = document.getElementById(componentId);
   cellId.style.backgroundColor = gameInformation.playerTurn === 1 ? 'red': 'yellow';
-  grid[row - 1][column - 1] = gameInformation.playerTurn === 1 ? 1 : 2;
+  grid[row - 1][column - 1] = gameInformation.playerTurn;
   gameInformation.movesMade = gameInformation.movesMade + 1;
   gridNextMove[Number(column) - 1] = row - 1;
+  console.log(gridNextMove);
   // Check to end game
   if (checkWinCondition(row - 1, column - 1)) {
     endGame(gameInformation.playerTurn, false);
@@ -179,7 +189,7 @@ function addChip(e) {
   // Uncolor hover
   const hoverComponentId = 'r0c' + col;
   const cellId = document.getElementById(hoverComponentId);
-  cellId.style.background = 'darkslategray'; 
+  cellId.style.backgroundColor = 'darkslategray'; 
 
   console.log('SENT MOVE')
   gameInformation.playerTurn = gameInformation.opponentId;
@@ -212,8 +222,9 @@ function hoverOut(e) {
   cellId.style.backgroundColor = 'darkslategray';
 }
 
-function activatePlayAgainButton() {
+function activatePlayAgainButton(text) {
   const playAgainButton = document.getElementById('play-again');
+  playAgainButton.innerText = text;
   playAgainButton.style.visibility = 'visible';
   playAgainButton.addEventListener('click', (e) => location.reload());
 }
@@ -223,7 +234,7 @@ function endGame(winner, isTie) {
   else if (winner !== gameInformation.playerId) changePlayerMessageText('Loser!');
   else changePlayerMessageText('Winner!');
   gameInformation.gameEnded = true;
-  activatePlayAgainButton();
+  activatePlayAgainButton('Play Again');
   console.log("winner winner chicker dinner");
   const gameEnded = {
     type: 'gameEnded',
@@ -264,12 +275,15 @@ webSocket.onmessage = function(event) {
       break;
     case 'playerLeft':
       console.log(message);
+      console.log(gameInformation);
       gameInformation.gameEnded = true;
-      changePlayerMessageText('Winner! Your opponent has left...');
-      activatePlayAgainButton();
+      if (message.isOngoingGame) changePlayerMessageText('Winner! Your opponent has left.');
+      webSocket.close();
+      activatePlayAgainButton('Play Again');
       break;
     case 'close':
-      changePlayerMessageText('Game is currently full...')
+      changePlayerMessageText('Game is currently full...');
+      activatePlayAgainButton('Try Again');
       break;
     default:
       console.log(message);

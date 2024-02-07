@@ -11,6 +11,7 @@ const gameInformation = {
   nextPlayerId: 1,
   nextOpponentId: 2,
 }
+let isOngoingGame = false;
 
 const server = http.createServer(app);
 
@@ -21,6 +22,7 @@ const sockets = {
 };
 
 wss.on('connection', (socket) => {
+  console.log(`NUMBER OF PLAYERS IS: ${numberOfPlayers}`)
   if (numberOfPlayers === 2) {
     const connectionRejection = {
       type: 'close',
@@ -47,8 +49,12 @@ wss.on('connection', (socket) => {
         };
         // Let opponent know you have joined their game
         if (sockets[opponentId]?.readyState === WebSocket.OPEN) {
+          console.log(`Sending connection message to Player ${opponentId}`);
+          isOngoingGame = true;
           sockets[opponentId].send(JSON.stringify(opponentMessage));
+          // If there was already a player in lobby, notify player
           if (numberOfPlayers === 1) {
+            console.log(`Sending connection message for WAITING player ${playerId}`)
             socket.send(JSON.stringify(opponentMessage));
           }
         }
@@ -61,7 +67,9 @@ wss.on('connection', (socket) => {
         }
         break;
       case 'gameEnded':
-        numberOfPlayers--;
+        console.log(`END GAME MESSAGE FROM Player ${playerId}`);
+        console.log(numberOfPlayers);
+        isOngoingGame = false;
         sockets[playerId] = null;
         socket.close();
       default:
@@ -76,9 +84,11 @@ wss.on('connection', (socket) => {
       const closedSession = {
         type: 'playerLeft',
         message: 'Your opponent has disconnected',
+        isOngoingGame,
       };
       sockets[opponentId].send(JSON.stringify(closedSession));
     }
+    isOngoingGame = false;
     gameInformation.nextPlayerId = playerId;
     gameInformation.nextOpponentId = opponentId;
   })
