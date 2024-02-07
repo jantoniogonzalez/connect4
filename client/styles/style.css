@@ -2,7 +2,7 @@ body{
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: darkslategray;
+  background-color: darkgreen;
   height: 100vh;
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
@@ -21,7 +21,7 @@ table {
   cursor: pointer;
 }
 .empty-col {
-  background-color: darkslategray;
+  background-color: darkgreen;
 }
 .empty-col:hover {
   cursor: pointer;
@@ -37,7 +37,7 @@ table {
   width: 75px;
   height: 75px;
   border-radius: 50%;
-  background-color: darkslategray;
+  background-color: darkgreen;
   margin: 0.25em;
 }
 .container {

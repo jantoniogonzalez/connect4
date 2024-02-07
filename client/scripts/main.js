@@ -25,6 +25,14 @@ function changePlayerMessageText(text) {
   playerMessage.innerText = text;
 }
 
+function setWinningColorPieces(componentIds) {
+  console.log(setWinningColorPieces);
+  for (let i = 0; i < componentIds.length; i++) {
+    const colorPiece = document.getElementById(componentIds[i]);
+    colorPiece.style.backgroundColor = 'purple';
+  }
+}
+
 function assignEventListeners() {
   if (gameInformation.playerTurn === gameInformation.playerId) changePlayerMessageText('Your Move');
   else changePlayerMessageText('Waiting for opponent to move...');
@@ -64,6 +72,9 @@ function assignEventListeners() {
 
 function checkRows(row, column, playerNumber) {
   console.log('CHECKING ROWS');
+  let componentIdRow = row + 1;
+  let componentIdCol = column + 1
+  const winningCombination = ['r'+componentIdRow+'c'+componentIdCol];
   let piecesInARow = 1;
   let i = column + 1;
   // Check Right
@@ -71,27 +82,47 @@ function checkRows(row, column, playerNumber) {
   while (i<gameInformation.numberColumns && grid[row][i] === playerNumber) {
     piecesInARow++;
     i++;
-    if (piecesInARow === 4) return true;
+    componentIdCol++;
+    winningCombination.push('r'+componentIdRow+'c'+componentIdCol);
+    if (piecesInARow === 4) {
+      setWinningColorPieces(winningCombination);
+      return true;
+    }
   }
   i = column - 1;
   // Check Left
   console.log('CHECK LEFT');
+  componentIdCol = column + 1;
   while(i>=0 && grid[row][i] === playerNumber) {
     piecesInARow++;
     i--;
-    if (piecesInARow === 4) return true;
+    componentIdCol--;
+    winningCombination.push('r'+componentIdRow+'c'+componentIdCol);
+    if (piecesInARow === 4){
+      setWinningColorPieces(winningCombination);
+      return true;
+    }
   }
+  console.log('DONe CHECKING');
   return false;
 }
 
 function checkDown(row, column, playerNumber) {
   console.log('CHECKING DOWN')
   let piecesInARow = 1;
+  let componentIdRow = row + 1;
+  let componentIdCol = column + 1;
+  const winningCombination = ['r'+componentIdRow+'c'+componentIdCol];
   row++;
   while(row < gameInformation.numberRows && grid[row][column] === playerNumber) {
     piecesInARow++;
     row++;
-    if (piecesInARow === 4) return true;
+    componentIdRow++;
+    winningCombination.push('r'+componentIdRow+'c'+componentIdCol);
+    if (piecesInARow === 4) {
+      setWinningColorPieces(winningCombination);
+      return true;
+    }
   }
   return false;
 }
@@ -99,6 +130,9 @@ function checkDown(row, column, playerNumber) {
 function checkDiagonals(row, column, playerNumber) {
   console.log('CHECKING DIAGONALS')
   let piecesInARow = 1;
+  let componentIdRow = row + 1;
+  let componentIdCol = column + 1;
+  const winningCombination = ['r'+componentIdRow+'c'+componentIdCol];
   // Check right down
   let i = row + 1;
   let j = column + 1;
@@ -106,39 +140,70 @@ function checkDiagonals(row, column, playerNumber) {
   while(i < gameInformation.numberRows && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
     i++;
     j++;
+    componentIdCol++;
+    componentIdRow++;
+    winningCombination.push('r'+componentIdRow+'c'+componentIdCol);
     piecesInARow++;
-    if (piecesInARow === 4) return true;
+    if (piecesInARow === 4) {
+      setWinningColorPieces(winningCombination);
+      return true;
+    }
   }
   // Check left up
+  componentIdRow = row + 1;
+  componentIdCol = column + 1;
   i = row - 1;
   j = column - 1;
   console.log('CHECKING LEFT UP');
   while(i >= 0 && j >= 0 && grid[i][j] === playerNumber) {
     i--;
     j--;
+    componentIdCol--;
+    componentIdRow--;
+    winningCombination.push('r'+componentIdRow+'c'+componentIdCol);
     piecesInARow++;
-    if (piecesInARow === 4) return true;
+    if (piecesInARow === 4) {
+      setWinningColorPieces(winningCombination);
+      return true;
+    }
   }
   piecesInARow = 1;
   // Check left down
+  componentIdRow = row + 1;
+  componentIdCol = column + 1;
+  const winningCombination2 = ['r' + componentIdRow + 'c' + componentIdCol];
   i = row + 1;
   j = column - 1;
   console.log('CHECKING LEFT DOWN');
   while(i < gameInformation.numberRows && j >= 0 && grid[i][j] === playerNumber) {
     i++;
     j--;
+    componentIdCol--;
+    componentIdRow++;
+    winningCombination2.push('r'+componentIdRow+'c'+componentIdCol);
     piecesInARow++;
-    if (piecesInARow === 4) return true;
+    if (piecesInARow === 4) {
+      setWinningColorPieces(winningCombination2);
+      return true;
+    }
   }
   // Check right up
   console.log('CHECKING RIGHT UP');
+  componentIdRow = row + 1;
+  componentIdCol = column + 1;
   i = row - 1;
   j = column + 1;
   while(i >= 0 && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
     i--;
     j++;
+    componentIdCol++;
+    componentIdRow--;
+    winningCombination2.push('r'+componentIdRow+'c'+componentIdCol);
     piecesInARow++;
-    if (piecesInARow === 4) return true;
+    if (piecesInARow === 4) {
+      setWinningColorPieces(winningCombination2);
+      return true;
+    }
   }
   return false;
 }
@@ -189,7 +254,7 @@ function addChip(e) {
   // Uncolor hover
   const hoverComponentId = 'r0c' + col;
   const cellId = document.getElementById(hoverComponentId);
-  cellId.style.backgroundColor = 'darkslategray'; 
+  cellId.style.backgroundColor = 'darkgreen'; 
 
   console.log('SENT MOVE')
   gameInformation.playerTurn = gameInformation.opponentId;
@@ -219,7 +284,7 @@ function hoverOut(e) {
   const column = e.target.id[3];
   const componentId = "r0c" + column;
   const cellId = document.getElementById(componentId);
-  cellId.style.backgroundColor = 'darkslategray';
+  cellId.style.backgroundColor = 'darkgreen';
 }
 
 function activatePlayAgainButton(text) {
