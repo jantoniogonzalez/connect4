@@ -308,7 +308,7 @@ function endGame(winner, isTie) {
   webSocket.send(JSON.stringify(gameEnded));
 }
 
-const webSocket = new WebSocket("wss://localhost:8080");
+const webSocket = new WebSocket("wss://connect4uvsme.onrender.com");
 
 webSocket.onopen = function(event) {
   const message = {
