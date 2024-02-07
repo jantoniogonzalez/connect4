@@ -1,11 +1,14 @@
-:root{
+body{
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: black;
+  background-color: darkslategray;
+  height: 100vh;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 h1 {
   text-align: center ;
+  position: absolute;
   color: white;
 }
 table {
@@ -18,34 +21,41 @@ table {
   cursor: pointer;
 }
 .empty-col {
-  background-color: black;
+  background-color: darkslategray;
 }
 .empty-col:hover {
   cursor: pointer;
 }
 .chip {
-  width: 100px;
-  height: 100px;
+  width: 75px;
+  height: 75px;
   border-radius: 50%;
   background-color: darkblue;
-  margin: 0.5em;
+  margin: 0.25em;
 }
 .blank-chip {
-  width: 100px;
-  height: 100px;
+  width: 75px;
+  height: 75px;
   border-radius: 50%;
-  background-color: black;
-  margin: 0.5em;
+  background-color: darkslategray;
+  margin: 0.25em;
 }
-#waiting-for-players{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200px;
-  height: 50px;
-  font-size: 24px;
+.container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+#player-message {
+  padding: 1em 0.5em;
+  border-radius: 25%;
+  height: min-content;
+  font-size: 18px;
   text-align: center;
   background-color: white;
   color: black;
-
+}
+#play-again {
+  padding: 1em 0.5em;
+  height: min-content;
+  visibility: hidden;
 }

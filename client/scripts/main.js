@@ -1,5 +1,5 @@
-let gridNextMove = [6, 6, 6, 6, 6, 6, 6]
-let grid = [
+const gridNextMove = [6, 6, 6, 6, 6, 6, 6]
+const grid = [
   [0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0],
@@ -8,7 +8,6 @@ let grid = [
   [0, 0, 0, 0, 0, 0, 0],
 ]
 
-let player1Turn = true;
 const gameInformation = {
   movesMade: 0,
   maxMoves: 42,
@@ -16,159 +15,20 @@ const gameInformation = {
   numberRows: 6,
   playerId: 0,
   opponentId: 0,
-}
-let playerNumber = 0;
-
-const webSocket = new WebSocket("ws://localhost:8080");
-
-webSocket.onopen = function(event) {
-  const message = {
-    type: 'connection',
-    message: 'WAZAAAA',
-  };
-  webSocket.send(JSON.stringify(message));
-}
-webSocket.onmessage = function(event) {
-  const message = JSON.parse(event.data);
-  console.log('RECEIVED MESSAGE');
-  switch(message.type) {
-    case 'connection':
-      gameInformation.playerId = message.playerId;
-      
-      console.log(message.message);
-      break;
-    case 'move':
-      console.log(message.message);
-      console.log(message.move);
-    default:
-      console.log(message);
-  }
-  console.log(`Hello player ${message.playerId}`)
+  pieceColor: 'red',
+  playerTurn: 1,
+  gameEnded: false,
 }
 
-console.log('JS is connected')
-
-function checkRows(row, column, playerNumber) {
-  let piecesInARow = 1;
-  let i = column + 1;
-  while (i<numberColumns && grid[row][i] === playerNumber) {
-    piecesInARow++;
-    i++;
-    if (piecesInARow === 4) return true;
-  }
-  i = column - 1;
-  while(i>=0 && grid[row][i] === playerNumber) {
-    piecesInARow++;
-    i--;
-    if (piecesInARow === 4) return true;
-  }
-  return false;
-}
-
-function checkDown(row, column, playerNumber) {
-  let piecesInARow = 1;
-  row++;
-  while(row < numberRows && grid[row][column] === playerNumber) {
-    piecesInARow++;
-    row++;
-    if (piecesInARow === 4) return true;
-  }
-  return false;
-}
-
-function checkDiagonals(row, column, playerNumber) {
-  let piecesInARow = 1;
-  // Check right down
-  let i = row + 1;
-  let j = column + 1;
-  while(i < numberRows && j < numberColumns && grid[i][j] === playerNumber) {
-    i++;
-    j++;
-    piecesInARow++;
-    if (piecesInARow === 4) return true;
-  }
-  // Check left up
-  i = row - 1;
-  j = column - 1;
-  while(i < numberRows && j < numberColumns && grid[i][j] === playerNumber) {
-    i--;
-    j--;
-    piecesInARow++;
-    if (piecesInARow === 4) return true;
-  }
-  piecesInARow = 1;
-  //C Check left down
-  i = row + 1;
-  j = column - 1;
-  while(i < numberRows && j < numberColumns && grid[i][j] === playerNumber) {
-    i++;
-    j--;
-    piecesInARow++;
-    if (piecesInARow === 4) return true;
-  }
-  i = row - 1;
-  j = column + 1;
-  while(i < numberRows && j < numberColumns && grid[i][j] === playerNumber) {
-    i--;
-    j++;
-    piecesInARow++;
-    if (piecesInARow === 4) return true;
-  }
-  return false;
-}
-
-function checkWinCondition(row, column) {
-  let playerNumber = player1Turn ? 1 : 2;
-  // Check for rows
-  if (checkRows(row, column, playerNumber)) return true;
-  // Check Down
-  if (checkDown(row, column, playerNumber)) return true;
-  // Check Diagonals
-  if (checkDiagonals(row, column, playerNumber)) return true;
-  return false;
-}
-
-function addChip(e) {
-  const column = e.target.id[3];
-  const row = gridNextMove[Number(column) - 1];
-  // Column is full
-  if (row === 0) return;
-  const componentId = "r" + row + "c" + column;
-  const cellId = document.getElementById(componentId);
-  cellId.style.backgroundColor = player1Turn ? 'red': 'yellow';
-  grid[row - 1][column - 1] = player1Turn ? 1 : 2;
-  gameInformation.movesMade = gameInformation.movesMade + 1;
-  webSocket.send(JSON.stringify({ type: 'move', message: 'Whats up loser', move: componentId, opponentId: gameInformation.opponentId, playerId: gameInformation.playerId }));
-
-  // Check to end game
-  if (checkWinCondition(row - 1, column - 1)) {
-    console.log('GAME ENDED WITH WINNER');
-  }
-  if (gameInformation.movesMade === gameInformation.maxMoves) console.log('GAME ENDED IN A DRAW');
-
-  player1Turn = !player1Turn;
-  gridNextMove[Number(column) - 1] = row - 1;
-  // Change current hovering color
-  const hoverComponentId = "r0c" + column;
-  const hoverCellId = document.getElementById(hoverComponentId);
-  hoverCellId.style.backgroundColor = player1Turn ? 'red' : 'yellow';
-}
-
-function hoverChip(e) {
-  const column = e.target.id[3];
-  const componentId = "r0c" + column;
-  const cellId = document.getElementById(componentId);
-  cellId.style.backgroundColor = player1Turn ? 'red': 'yellow';
-}
-
-function hoverOut(e) {
-  const column = e.target.id[3];
-  const componentId = "r0c" + column;
-  const cellId = document.getElementById(componentId);
-  cellId.style.backgroundColor = 'black';
+function changePlayerMessageText(text) {
+  const playerMessage = document.getElementById('player-message');
+  playerMessage.innerText = text;
 }
 
 function assignEventListeners() {
+  if (gameInformation.playerTurn === gameInformation.playerId) changePlayerMessageText('Your Move');
+  else changePlayerMessageText('Waiting for opponent to move...');
+
   const col1Elements = document.getElementsByClassName('col-1');
   const col2Elements = document.getElementsByClassName('col-2');
   const col3Elements = document.getElementsByClassName('col-3');
@@ -199,4 +59,222 @@ function assignEventListeners() {
     col6Elements[i].addEventListener('mouseout', hoverOut);
     col7Elements[i].addEventListener('mouseout', hoverOut);
   }
+  console.log(`is player turn: ${gameInformation.playerTurn}`);
 }
+
+function checkRows(row, column, playerNumber) {
+  console.log('CHECKING ROWS');
+  let piecesInARow = 1;
+  let i = column + 1;
+  while (i<gameInformation.numberColumns && grid[row][i] === playerNumber) {
+    piecesInARow++;
+    i++;
+    if (piecesInARow === 4) return true;
+  }
+  i = column - 1;
+  while(i>=0 && grid[row][i] === playerNumber) {
+    piecesInARow++;
+    i--;
+    if (piecesInARow === 4) return true;
+  }
+  return false;
+}
+
+function checkDown(row, column, playerNumber) {
+  console.log('CHECKING DOWN')
+  let piecesInARow = 1;
+  row++;
+  while(row < gameInformation.numberRows && grid[row][column] === playerNumber) {
+    piecesInARow++;
+    row++;
+    if (piecesInARow === 4) return true;
+  }
+  return false;
+}
+
+function checkDiagonals(row, column, playerNumber) {
+  console.log('CHECKING DIAGONALS')
+  let piecesInARow = 1;
+  // Check right down
+  let i = row + 1;
+  let j = column + 1;
+  while(i < gameInformation.numberRows && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
+    i++;
+    j++;
+    piecesInARow++;
+    if (piecesInARow === 4) return true;
+  }
+  // Check left up
+  i = row - 1;
+  j = column - 1;
+  while(i < gameInformation.numberRows && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
+    i--;
+    j--;
+    piecesInARow++;
+    if (piecesInARow === 4) return true;
+  }
+  piecesInARow = 1;
+  //C Check left down
+  i = row + 1;
+  j = column - 1;
+  while(i < gameInformation.numberRows && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
+    i++;
+    j--;
+    piecesInARow++;
+    if (piecesInARow === 4) return true;
+  }
+  i = row - 1;
+  j = column + 1;
+  while(i < gameInformation.numberRows && j < gameInformation.numberColumns && grid[i][j] === playerNumber) {
+    i--;
+    j++;
+    piecesInARow++;
+    if (piecesInARow === 4) return true;
+  }
+  return false;
+}
+
+function checkWinCondition(row, column) {
+  // Check for rows
+  if (checkRows(row, column, gameInformation.playerTurn)) return true;
+  // Check Down
+  if (checkDown(row, column, gameInformation.playerTurn)) return true;
+  // Check Diagonals
+  if (checkDiagonals(row, column, gameInformation.playerTurn)) return true;
+  return false;
+}
+
+function updateGameState(row, column, componentId) {
+  const cellId = document.getElementById(componentId);
+  cellId.style.backgroundColor = gameInformation.playerTurn === 1 ? 'red': 'yellow';
+  grid[row - 1][column - 1] = gameInformation.playerTurn === 1 ? 1 : 2;
+  gameInformation.movesMade = gameInformation.movesMade + 1;
+  gridNextMove[Number(column) - 1] = row - 1;
+  // Check to end game
+  if (checkWinCondition(row - 1, column - 1)) {
+    endGame(gameInformation.playerTurn, false);
+    return;
+  }
+  if (gameInformation.movesMade === gameInformation.maxMoves) {
+    endGame(gameInformation.playerTurn, true);
+    return;
+  }
+  if (gameInformation.playerTurn !== gameInformation.playerId) changePlayerMessageText('Your Move');
+  else changePlayerMessageText('Waiting for opponent to move...');
+  console.log('FINISHED UPDATING GAME STATE')
+}
+
+function addChip(e) {
+  // Not player's turn
+  if (gameInformation.playerTurn !== gameInformation.playerId || gameInformation.gameEnded) return;
+  const col = e.target.id[3];
+  const row = gridNextMove[Number(col) - 1];
+  const componentId = "r" + row + "c" + col;
+
+  // Column is full
+  if (row === 0) return;
+
+  // Move Piece
+  updateGameState(row, col, componentId);
+  // Uncolor hover
+  const hoverComponentId = 'r0c' + col;
+  const cellId = document.getElementById(hoverComponentId);
+  cellId.style.background = 'darkslategray'; 
+
+  console.log('SENT MOVE')
+  gameInformation.playerTurn = gameInformation.opponentId;
+  const message = {
+    type: 'move',
+    componentId,
+    row,
+    col,
+    opponentId: gameInformation.opponentId,
+    playerId: gameInformation.playerId,
+    playerTurn: gameInformation.playerTurn,
+    gameEnded: gameInformation.gameEnded,
+  };
+  webSocket.send(JSON.stringify(message));
+}
+
+function hoverChip(e) {
+  if (gameInformation.playerTurn !== gameInformation.playerId || gameInformation.gameEnded) return;
+  const column = e.target.id[3];
+  const componentId = "r0c" + column;
+  const cellId = document.getElementById(componentId);
+  cellId.style.backgroundColor = gameInformation.pieceColor;
+}
+
+function hoverOut(e) {
+  if (gameInformation.playerTurn !== gameInformation.playerId || gameInformation.gameEnded) return;
+  const column = e.target.id[3];
+  const componentId = "r0c" + column;
+  const cellId = document.getElementById(componentId);
+  cellId.style.backgroundColor = 'darkslategray';
+}
+
+function activatePlayAgainButton() {
+  const playAgainButton = document.getElementById('play-again');
+  playAgainButton.style.visibility = 'visible';
+  playAgainButton.addEventListener('click', (e) => location.reload());
+}
+
+function endGame(winner, isTie) {
+  if (isTie) changePlayerMessageText('Draw...');
+  else if (winner !== gameInformation.playerId) changePlayerMessageText('Loser!');
+  else changePlayerMessageText('Winner!');
+  gameInformation.gameEnded = true;
+  activatePlayAgainButton();
+  console.log("winner winner chicker dinner");
+  const gameEnded = {
+    type: 'gameEnded',
+    message: 'It is done!',
+  }
+  webSocket.send(JSON.stringify(gameEnded));
+}
+
+const webSocket = new WebSocket("ws://localhost:8080");
+
+webSocket.onopen = function(event) {
+  const message = {
+    type: 'connection',
+    message: 'WAZAAAA',
+  };
+  webSocket.send(JSON.stringify(message));
+}
+webSocket.onmessage = function(event) {
+  const message = JSON.parse(event.data);
+  console.log('RECEIVED MESSAGE');
+  switch(message.type) {
+    case 'connection':
+      gameInformation.playerId = Number(message.playerId);
+      gameInformation.opponentId = Number(message.opponentId);
+      if (message.playerId === 2) gameInformation.pieceColor = 'yellow';
+      gameInformation.gameEnded = false;
+      console.log(message.message);
+      break;
+    case 'opponentConnection':
+      assignEventListeners();
+      break;
+    case 'move':
+      console.log('A MOVE HAS BEEN MADE')
+      console.log(message);
+      gameInformation.gameEnded = message.gameEnded;
+      updateGameState(Number(message.row), Number(message.col), message.componentId);
+      gameInformation.playerTurn = message.playerTurn;
+      break;
+    case 'playerLeft':
+      console.log(message);
+      gameInformation.gameEnded = true;
+      changePlayerMessageText('Winner! Your opponent has left...');
+      activatePlayAgainButton();
+      break;
+    case 'close':
+      changePlayerMessageText('Game is currently full...')
+      break;
+    default:
+      console.log(message);
+  }
+}
+
+console.log('JS is connected')
+
